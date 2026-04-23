@@ -34,6 +34,12 @@ class handler(BaseHTTPRequestHandler):
                 'format':      fmt_str,
                 'quiet':       True,
                 'no_warnings': True,
+                # Use TV client to bypass YouTube's server-side bot check
+                'extractor_args': {
+                    'youtube': {
+                        'player_client': ['tv', 'web_creator', 'mweb'],
+                    }
+                },
             }
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:

@@ -443,7 +443,14 @@
         clearInterval(t);
 
         if (data.error) {
-          status('err', 'error — ' + data.error.slice(0, 100));
+          const msg = data.error;
+          if (/sign in|bot|login|confirm/i.test(msg)) {
+            status('err', 'youtube blocked this server — try the desktop app for YouTube links');
+          } else if (/unsupported url|no video/i.test(msg)) {
+            status('err', 'unsupported link — check the url and try again');
+          } else {
+            status('err', 'error — ' + msg.slice(0, 90));
+          }
           return;
         }
 
