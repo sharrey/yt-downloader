@@ -1,6 +1,8 @@
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import json
+import os
+import tempfile
 
 
 class handler(BaseHTTPRequestHandler):
@@ -12,20 +14,34 @@ class handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         qs = parse_qs(urlparse(self.path).query)
-        url     = qs.get('url',     [''])[0].strip()
-        fmt     = qs.get('format',  ['mp4'])[0]
-        quality = qs.get('quality', ['best'])[0]
+        self._handle(
+            url=qs.get('url', [''])[0].strip(),
+            fmt=qs.get('format', ['mp4'])[0],
+            quality=qs.get('quality', ['best'])[0],
+            cookies='',
+        )
 
+    def do_POST(self):
+        length = int(self.headers.get('Content-Length', 0))
+        body = json.loads(self.rfile.read(length)) if length else {}
+        self._handle(
+            url=body.get('url', '').strip(),
+            fmt=body.get('format', 'mp4'),
+            quality=body.get('quality', 'best'),
+            cookies=body.get('cookies', '').strip(),
+        )
+
+    def _handle(self, url, fmt, quality, cookies):
         if not url:
             return self._json(400, {'error': 'url parameter is required'})
 
+        cookie_path = None
         try:
             import yt_dlp
 
             if fmt == 'mp3':
                 fmt_str = 'bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio'
             elif quality == 'best':
-                # Prefer combined single-file mp4; fall back to best available
                 fmt_str = 'best[ext=mp4]/best'
             else:
                 fmt_str = f'best[ext=mp4][height<={quality}]/best[height<={quality}]/best'
@@ -34,13 +50,19 @@ class handler(BaseHTTPRequestHandler):
                 'format':      fmt_str,
                 'quiet':       True,
                 'no_warnings': True,
-                # Use TV client to bypass YouTube's server-side bot check
                 'extractor_args': {
                     'youtube': {
                         'player_client': ['tv', 'web_creator', 'mweb'],
                     }
                 },
             }
+
+            # Write cookies to a temp file if provided
+            if cookies:
+                fd, cookie_path = tempfile.mkstemp(suffix='.txt', dir='/tmp')
+                os.write(fd, cookies.encode())
+                os.close(fd)
+                ydl_opts['cookiefile'] = cookie_path
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(url, download=False)
@@ -49,7 +71,6 @@ class handler(BaseHTTPRequestHandler):
             thumbnail = info.get('thumbnail', '')
             ext       = info.get('ext', 'mp4' if fmt == 'mp4' else 'm4a')
 
-            # Resolve URL: single format → info['url'], DASH → requested_formats[0]
             dl_url = info.get('url', '')
             if not dl_url:
                 req = info.get('requested_formats') or []
@@ -69,9 +90,13 @@ class handler(BaseHTTPRequestHandler):
         except Exception as exc:
             self._json(500, {'error': str(exc)})
 
+        finally:
+            if cookie_path and os.path.exists(cookie_path):
+                os.unlink(cookie_path)
+
     def _cors(self):
         self.send_header('Access-Control-Allow-Origin',  '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
 
     def _json(self, status, data):
