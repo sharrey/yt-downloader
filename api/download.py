@@ -40,11 +40,11 @@ class handler(BaseHTTPRequestHandler):
             import yt_dlp
 
             if fmt == 'mp3':
-                fmt_str = 'bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio'
+                fmt_str = 'bestaudio/best'
             elif quality == 'best':
-                fmt_str = 'best[ext=mp4]/best'
+                fmt_str = 'best'
             else:
-                fmt_str = f'best[ext=mp4][height<={quality}]/best[height<={quality}]/best'
+                fmt_str = f'best[height<={quality}]/best'
 
             ydl_opts = {
                 'format':      fmt_str,
