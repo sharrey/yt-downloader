@@ -251,11 +251,6 @@
       cursor: pointer;
     }
 
-    #r-hint {
-      color: var(--muted);
-      font-style: italic;
-    }
-
     /* ── Platform pills ── */
     .platforms {
       display: flex;
@@ -426,8 +421,7 @@
     <div id="result">
       <div id="r-title"></div>
       <div id="r-meta">
-        <a id="r-link" target="_blank" rel="noopener noreferrer">open / save video ↗</a>
-        <span id="r-hint"></span>
+        <a id="r-link" target="_blank" rel="noopener noreferrer">download ↗</a>
       </div>
     </div>
 
@@ -534,29 +528,21 @@
         const filename = (data.title || 'video').replace(/[\\/:*?"<>|]/g, '_') + '.' + (data.ext || 'mp4');
         document.getElementById('r-title').textContent = data.title;
         const link = document.getElementById('r-link');
-        link.href = data.url;
+
+        // Proxy URL streams through our server with Content-Disposition: attachment
+        // so the browser saves it to disk without buffering into RAM.
+        const proxyUrl = `/api/proxy?url=${encodeURIComponent(data.url)}&filename=${encodeURIComponent(filename)}`;
+        link.href = proxyUrl;
         link.download = filename;
         rEl.classList.add('show');
 
-        // Try a fetch→blob download (works when CDN allows CORS).
-        // If it fails (CORS blocked), just leave the link for the user to click.
-        try {
-          const r2 = await fetch(data.url);
-          const blob = await r2.blob();
-          const blobUrl = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = blobUrl;
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          setTimeout(() => URL.revokeObjectURL(blobUrl), 30000);
-          status('ok', 'downloading…');
-        } catch (_) {
-          // CORS blocked — show the link and a hint
-          document.getElementById('r-hint').textContent = ' · if video plays in browser, right-click → Save video as';
-          status('ok', 'ready — click the link above to save');
-        }
+        const a = document.createElement('a');
+        a.href = proxyUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        status('ok', 'downloading…');
 
       } catch (e) {
         clearInterval(t);
