@@ -7,17 +7,36 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <script>
+    (function() {
+      var saved = localStorage.getItem('theme');
+      var sys = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', saved || sys);
+    })();
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* ── Light mode (softened) ── */
     :root {
-      --bg:      #F5F2ED;
-      --surface: #EAE7E1;
-      --border:  #111111;
-      --text:    #111111;
-      --muted:   #999999;
-      --red:     #C91800;
-      --green:   #1A6B1A;
+      --bg:      #ECEAE5;
+      --surface: #E1DED8;
+      --border:  #2E2B28;
+      --text:    #2E2B28;
+      --muted:   #918C86;
+      --red:     #B81500;
+      --green:   #1C621C;
+    }
+
+    /* ── Dark mode ── */
+    [data-theme="dark"] {
+      --bg:      #141312;
+      --surface: #1C1B19;
+      --border:  #3D3A37;
+      --text:    #CEC9C2;
+      --muted:   #625E58;
+      --red:     #E8341C;
+      --green:   #3DB53D;
     }
 
     html { scroll-behavior: smooth; }
@@ -32,6 +51,7 @@
       align-items: center;
       justify-content: center;
       padding: 60px 24px;
+      transition: background 0.2s, color 0.2s;
     }
 
     .wrap {
@@ -111,7 +131,7 @@
     }
 
     input[type="text"]:focus { border-bottom-color: var(--red); }
-    input[type="text"]::placeholder { color: #C8C4BC; }
+    input[type="text"]::placeholder { color: var(--muted); opacity: 0.7; }
 
     /* ── Format toggles ── */
     .fmt-row { display: flex; gap: 8px; }
@@ -137,7 +157,7 @@
       appearance: none;
       -webkit-appearance: none;
       background-color: transparent;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7'%3E%3Cpath d='M.5.5 5.5 6l5-5.5' stroke='%23111' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7'%3E%3Cpath d='M.5.5 5.5 6l5-5.5' stroke='%232E2B28' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 12px center;
       border: 2px solid var(--border);
@@ -149,6 +169,10 @@
       outline: none;
       min-width: 160px;
       transition: border-color 0.12s;
+    }
+
+    [data-theme="dark"] select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7'%3E%3Cpath d='M.5.5 5.5 6l5-5.5' stroke='%23CEC9C2' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     }
 
     select:focus { border-color: var(--red); }
@@ -227,6 +251,23 @@
       cursor: pointer;
     }
 
+    /* ── Theme toggle ── */
+    .hd-right { display: flex; align-items: center; gap: 10px; }
+
+    #theme-btn {
+      background: none;
+      border: 1.5px solid var(--muted);
+      font-family: inherit;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 3px 8px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    #theme-btn:hover { color: var(--text); border-color: var(--text); }
+
     /* ── Footer ── */
     footer {
       margin-top: 40px;
@@ -244,7 +285,10 @@
 
     <div class="hd">
       <h1>YTDL</h1>
-      <span class="badge">yt-dlp</span>
+      <div class="hd-right">
+        <span class="badge">yt-dlp</span>
+        <button id="theme-btn" onclick="toggleTheme()"></button>
+      </div>
     </div>
     <p class="sub">no frills. just downloads.</p>
 
@@ -311,6 +355,18 @@
       { v:'128',  l:'128 kbps'      },
       { v:'96',   l:'96 kbps'       },
     ];
+
+    function toggleTheme() {
+      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      updateThemeBtn();
+    }
+
+    function updateThemeBtn() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.getElementById('theme-btn').textContent = isDark ? 'light' : 'dark';
+    }
 
     let fmt = 'mp4';
     const qEl  = document.getElementById('quality');
@@ -384,6 +440,7 @@
       .addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
 
     buildQuality(VQ);
+    updateThemeBtn();
   </script>
 </body>
 </html>
