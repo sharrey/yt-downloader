@@ -50,6 +50,7 @@ class handler(BaseHTTPRequestHandler):
                 'format':      fmt_str,
                 'quiet':       True,
                 'no_warnings': True,
+                'extractor_args': {'youtube': {'player_client': ['ios', 'web']}},
             }
 
             # Write cookies to a temp file if provided

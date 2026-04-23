@@ -513,7 +513,11 @@
         if (data.error) {
           const msg = data.error;
           if (/sign in|bot|login|confirm/i.test(msg)) {
-            status('err', 'youtube blocked — expand "YouTube cookies" above and paste your cookies');
+            if (cookies) {
+              status('err', 'youtube blocked this server\'s IP — even with cookies, Vercel\'s datacenter is banned. Use the desktop app for YouTube.');
+            } else {
+              status('err', 'youtube blocked — expand "YouTube cookies" above and paste your cookies');
+            }
           } else if (/unsupported url|no video/i.test(msg)) {
             status('err', 'unsupported link — check the url and try again');
           } else {
