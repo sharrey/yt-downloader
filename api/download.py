@@ -25,14 +25,10 @@ class handler(BaseHTTPRequestHandler):
             if fmt == 'mp3':
                 fmt_str = 'bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio'
             elif quality == 'best':
-                fmt_str = 'best[ext=mp4][protocol!*=dash]/best[ext=mp4]/best'
+                # Prefer combined single-file mp4; fall back to best available
+                fmt_str = 'best[ext=mp4]/best'
             else:
-                fmt_str = (
-                    f'best[ext=mp4][height<={quality}][protocol!*=dash]'
-                    f'/best[ext=mp4][height<={quality}]'
-                    f'/best[height<={quality}]'
-                    f'/best'
-                )
+                fmt_str = f'best[ext=mp4][height<={quality}]/best[height<={quality}]/best'
 
             ydl_opts = {
                 'format':      fmt_str,
@@ -47,7 +43,7 @@ class handler(BaseHTTPRequestHandler):
             thumbnail = info.get('thumbnail', '')
             ext       = info.get('ext', 'mp4' if fmt == 'mp4' else 'm4a')
 
-            # Resolve download URL from single-format or DASH info
+            # Resolve URL: single format → info['url'], DASH → requested_formats[0]
             dl_url = info.get('url', '')
             if not dl_url:
                 req = info.get('requested_formats') or []

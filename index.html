@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YTDL</title>
+  <title>SAVR — Video Downloader</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -251,6 +251,24 @@
       cursor: pointer;
     }
 
+    /* ── Platform pills ── */
+    .platforms {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 28px;
+    }
+
+    .platform {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-color: color-mix(in srgb, var(--muted) 40%, transparent);
+      padding: 2px 8px;
+    }
+
     /* ── Theme toggle ── */
     .hd-right { display: flex; align-items: center; gap: 10px; }
 
@@ -284,20 +302,29 @@
   <main class="wrap">
 
     <div class="hd">
-      <h1>YTDL</h1>
+      <h1>SAVR</h1>
       <div class="hd-right">
         <span class="badge">yt-dlp</span>
         <button id="theme-btn" onclick="toggleTheme()"></button>
       </div>
     </div>
-    <p class="sub">no frills. just downloads.</p>
+    <p class="sub">paste a link. get your file.</p>
+
+    <div class="platforms">
+      <span class="platform">YouTube</span>
+      <span class="platform">Twitter / X</span>
+      <span class="platform">Reddit</span>
+      <span class="platform">Instagram</span>
+      <span class="platform">TikTok</span>
+      <span class="platform">1000+ more</span>
+    </div>
 
     <hr>
 
     <div class="field">
       <label>URL</label>
       <input type="text" id="url"
-             placeholder="https://youtube.com/watch?v=..."
+             placeholder="youtube · twitter · reddit · instagram · tiktok..."
              autocomplete="off" spellcheck="false">
     </div>
 
@@ -333,7 +360,7 @@
 
     <footer>
       powered by yt-dlp &middot; no tracking &middot; no storage &middot; no ads<br>
-      audio downloads are served in m4a/webm (native format, no server-side conversion)
+      reddit videos may be silent (dash streams require server-side merging) &middot; audio in m4a/webm
     </footer>
 
   </main>
