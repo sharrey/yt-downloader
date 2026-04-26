@@ -98,11 +98,14 @@ class Router(DL):
                     'preferredquality': '192',
                 }]
 
+            auto_cookies = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cookies.txt')
             if cookies:
                 fd, cookie_path = tempfile.mkstemp(suffix='.txt', dir='/tmp')
                 os.write(fd, cookies.encode())
                 os.close(fd)
                 ydl_opts['cookiefile'] = cookie_path
+            elif os.path.exists(auto_cookies):
+                ydl_opts['cookiefile'] = auto_cookies
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(url, download=True)
