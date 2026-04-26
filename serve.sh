@@ -12,5 +12,5 @@ if [ ! -d ".venv" ]; then
 fi
 
 source .venv/bin/activate
-pip install yt-dlp -q
-python3 server.py
+.venv/bin/pip install yt-dlp -q
+.venv/bin/python3 server.py
