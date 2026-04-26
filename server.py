@@ -91,7 +91,7 @@ class Router(DL):
                 'extractor_args':       {'youtube': {'player_client': ['android', 'mweb', 'ios', 'web']}},
             }
             if node_path:
-                ydl_opts['js_runtimes'] = [f'node:{node_path}']
+                ydl_opts['js_runtimes'] = {'node': {'path': node_path}}
             if fmt == 'mp3':
                 ydl_opts['postprocessors'] = [{
                     'key': 'FFmpegExtractAudio',
