@@ -84,12 +84,11 @@ class Router(DL):
             print(f'  [dl] quality={quality!r} fmt={fmt!r} fmt_str={fmt_str!r} node={node_path!r}', flush=True)
 
             ydl_opts = {
-                'format':               fmt_str,
-                'outtmpl':              os.path.join(tmpdir, '%(title)s.%(ext)s'),
-                'quiet':                True,
-                'no_warnings':          True,
-                'merge_output_format':  'mp4',
-                'extractor_args':       {'youtube': {'player_client': ['android', 'mweb', 'ios', 'web']}},
+                'format':              fmt_str,
+                'outtmpl':             os.path.join(tmpdir, '%(title)s.%(ext)s'),
+                'quiet':               True,
+                'no_warnings':         True,
+                'merge_output_format': 'mp4',
             }
             if node_path:
                 ydl_opts['js_runtimes'] = {'node': {'path': node_path}}
