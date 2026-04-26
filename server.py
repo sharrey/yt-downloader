@@ -81,6 +81,7 @@ class Router(DL):
 
             import shutil
             node_path = shutil.which('node')
+            print(f'  [dl] quality={quality!r} fmt={fmt!r} fmt_str={fmt_str!r} node={node_path!r}', flush=True)
 
             ydl_opts = {
                 'format':               fmt_str,
@@ -110,6 +111,7 @@ class Router(DL):
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(url, download=True)
+            print(f'  [dl] got format={info.get("format")} height={info.get("height")} cookies_used={bool(ydl_opts.get("cookiefile"))}', flush=True)
 
             files = [f for f in os.listdir(tmpdir)
                      if not f.endswith('.part') and not f.endswith('.ytdl')]
