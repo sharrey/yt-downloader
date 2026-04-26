@@ -34,13 +34,27 @@ class Router(BaseHTTPRequestHandler):
 
     def _route(self, method):
         path = urlparse(self.path).path
-        if path.startswith('/api/download'):
-            getattr(DL, method)(self)
-        elif path.startswith('/api/proxy'):
-            getattr(Proxy, method)(self)
-        else:
-            self.send_response(404)
-            self.end_headers()
+        try:
+            if path.startswith('/api/download'):
+                getattr(DL, method)(self)
+            elif path.startswith('/api/proxy'):
+                getattr(Proxy, method)(self)
+            else:
+                self.send_response(404)
+                self.end_headers()
+        except Exception:
+            import traceback, json
+            traceback.print_exc()
+            try:
+                body = json.dumps({'error': traceback.format_exc()}).encode()
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Content-Length', str(len(body)))
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(body)
+            except Exception:
+                pass
 
     def log_message(self, fmt, *args):
         print(f'  {self.address_string()} {fmt % args}')
