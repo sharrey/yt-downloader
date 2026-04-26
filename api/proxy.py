@@ -5,6 +5,7 @@ import re
 
 # Only proxy known video CDN hosts to prevent SSRF abuse
 _ALLOWED = {
+    'googlevideo.com', 'youtube.com', 'ytimg.com',
     'video.twimg.com', 'twimg.com',
     'v.redd.it', 'redd.it', 'redditmedia.com', 'redditstatic.com',
     'cdninstagram.com', 'fbcdn.net',
