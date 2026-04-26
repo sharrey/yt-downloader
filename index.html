@@ -555,15 +555,18 @@
         document.getElementById('r-title').textContent = data.title;
         const link = document.getElementById('r-link');
 
-        // Proxy URL streams through our server with Content-Disposition: attachment
-        // so the browser saves it to disk without buffering into RAM.
-        const proxyUrl = `/api/proxy?url=${encodeURIComponent(data.url)}&filename=${encodeURIComponent(filename)}`;
-        link.href = proxyUrl;
+        // Local server returns direct_url (already downloaded+merged via ffmpeg).
+        // Vercel returns a CDN url that needs to go through the proxy.
+        const dlUrl = data.direct_url
+          ? data.direct_url
+          : `/api/proxy?url=${encodeURIComponent(data.url)}&filename=${encodeURIComponent(filename)}`;
+
+        link.href = dlUrl;
         link.download = filename;
         rEl.classList.add('show');
 
         const a = document.createElement('a');
-        a.href = proxyUrl;
+        a.href = dlUrl;
         a.download = filename;
         document.body.appendChild(a);
         a.click();

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 cd "$(dirname "$0")"
 
-if ! python3 -m venv --help &>/dev/null || ! python3 -c "import tkinter" &>/dev/null; then
+if ! python3 -m venv --help &>/dev/null || ! python3 -c "import tkinter" &>/dev/null || ! command -v ffmpeg &>/dev/null; then
   echo "Installing system dependencies (needs sudo)..."
-  sudo apt-get install -y python3-venv python3-tk
+  sudo apt-get install -y python3-venv python3-tk ffmpeg
 fi
 
 if [ ! -f ".venv/bin/pip" ]; then
