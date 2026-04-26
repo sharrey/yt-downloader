@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 cd "$(dirname "$0")"
 
+# Load nvm so node v20+ is in PATH
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
+# Fallback: add nvm node bin directly if nvm didn't set PATH
+NVM_NODE=$(ls "$NVM_DIR/versions/node" 2>/dev/null | sort -V | tail -1)
+[ -n "$NVM_NODE" ] && export PATH="$NVM_DIR/versions/node/$NVM_NODE/bin:$PATH"
+
 NODE_OK=false
 if command -v node &>/dev/null; then
   NODE_VER=$(node -e "process.stdout.write(process.version.slice(1).split('.')[0])" 2>/dev/null)
@@ -26,6 +33,14 @@ fi
 
 source .venv/bin/activate
 .venv/bin/pip install -U yt-dlp -q
+
+# Download missing yt-dlp EJS lib script if needed
+EJS_LIB=$(.venv/bin/python3 -c "import yt_dlp.extractor.youtube.jsc._builtin.vendor as v, os; print(os.path.dirname(v.__file__))" 2>/dev/null)
+if [ -n "$EJS_LIB" ] && [ ! -f "$EJS_LIB/yt.solver.lib.js" ]; then
+  EJS_VER=$(.venv/bin/python3 -c "from yt_dlp.extractor.youtube.jsc._builtin.vendor._info import VERSION; print(VERSION)" 2>/dev/null)
+  echo "Downloading EJS solver script v$EJS_VER..."
+  curl -fsSL "https://github.com/yt-dlp/ejs/releases/download/$EJS_VER/yt.solver.lib.js" -o "$EJS_LIB/yt.solver.lib.js" 2>/dev/null || true
+fi
 
 if [ "$1" = "tunnel" ]; then
   .venv/bin/python3 server.py &

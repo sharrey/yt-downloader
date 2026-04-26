@@ -79,6 +79,9 @@ class Router(DL):
             else:
                 fmt_str = f'bestvideo[height<={quality}]+bestaudio/best[height<={quality}]/best'
 
+            import shutil
+            node_path = shutil.which('node')
+
             ydl_opts = {
                 'format':               fmt_str,
                 'outtmpl':              os.path.join(tmpdir, '%(title)s.%(ext)s'),
@@ -87,6 +90,8 @@ class Router(DL):
                 'merge_output_format':  'mp4',
                 'extractor_args':       {'youtube': {'player_client': ['android', 'mweb', 'ios', 'web']}},
             }
+            if node_path:
+                ydl_opts['js_runtimes'] = [f'node:{node_path}']
             if fmt == 'mp3':
                 ydl_opts['postprocessors'] = [{
                     'key': 'FFmpegExtractAudio',
