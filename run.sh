@@ -21,6 +21,13 @@ pip install yt-dlp -q
 
 if [ "$1" = "server" ]; then
   python3 server.py
+elif [ "$1" = "tunnel" ]; then
+  # Start server in background, then tunnel
+  python3 server.py &
+  SERVER_PID=$!
+  trap "kill $SERVER_PID 2>/dev/null" EXIT
+  sleep 1
+  ./cloudflared tunnel --url http://localhost:8080
 else
   python3 main.py
 fi
