@@ -42,15 +42,19 @@ class handler(BaseHTTPRequestHandler):
             if fmt == 'mp3':
                 fmt_str = 'bestaudio/best'
             elif quality == 'best':
-                fmt_str = 'best'
+                fmt_str = 'best[acodec!=none][vcodec!=none]/best[acodec!=none]/best'
             else:
-                fmt_str = f'best[height<={quality}]/best'
+                fmt_str = (
+                    f'best[height<={quality}][acodec!=none][vcodec!=none]'
+                    f'/best[height<={quality}][acodec!=none]'
+                    f'/best[height<={quality}]/best'
+                )
 
             ydl_opts = {
                 'format':      fmt_str,
                 'quiet':       True,
                 'no_warnings': True,
-                'extractor_args': {'youtube': {'player_client': ['ios', 'web']}},
+                'extractor_args': {'youtube': {'player_client': ['android', 'mweb', 'ios', 'web']}},
             }
 
             # Write cookies to a temp file if provided
@@ -67,13 +71,19 @@ class handler(BaseHTTPRequestHandler):
             thumbnail = info.get('thumbnail', '')
             ext       = info.get('ext', 'mp4' if fmt == 'mp4' else 'm4a')
 
+            def _has_av(f):
+                return (f.get('acodec') not in (None, 'none')
+                        and f.get('vcodec') not in (None, 'none'))
+
             dl_url = info.get('url', '')
             if not dl_url:
                 req = info.get('requested_formats') or []
                 if req:
-                    dl_url = req[0].get('url', '')
+                    combined = next((f for f in req if _has_av(f)), None)
+                    dl_url = (combined or req[0]).get('url', '')
                 elif info.get('formats'):
-                    dl_url = info['formats'][-1].get('url', '')
+                    combined = next((f for f in reversed(info['formats']) if _has_av(f)), None)
+                    dl_url = (combined or info['formats'][-1]).get('url', '')
 
             self._json(200, {
                 'title':     title,

@@ -309,8 +309,14 @@
 
     .cookies-help a { color: var(--red); text-decoration: underline; }
 
+    .cookie-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
     #cookies {
-      width: 100%;
+      flex: 1;
       background: var(--surface);
       border: 1px solid var(--border);
       color: var(--text);
@@ -326,6 +332,22 @@
 
     #cookies:focus { border-color: var(--red); opacity: 1; }
     #cookies::placeholder { color: var(--muted); opacity: 0.6; }
+
+    .upload-btn {
+      display: block;
+      padding: 7px 12px;
+      border: 1.5px solid var(--muted);
+      font-family: inherit;
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: var(--muted);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.12s, border-color 0.12s;
+      user-select: none;
+    }
+
+    .upload-btn:hover { color: var(--text); border-color: var(--text); }
 
     /* ── Theme toggle ── */
     .hd-right { display: flex; align-items: center; gap: 10px; }
@@ -400,13 +422,17 @@
     </div>
 
     <details class="cookies">
-      <summary>YouTube cookies <span style="font-weight:400;letter-spacing:0;text-transform:none;font-style:italic">&nbsp;— fixes bot errors</span></summary>
+      <summary>YouTube cookies <span style="font-weight:400;letter-spacing:0;text-transform:none;font-style:italic">&nbsp;— if blocked</span></summary>
       <p class="cookies-help">
-        Install <a href="https://chromewebstore.google.com/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc" target="_blank" rel="noopener">Get cookies.txt</a> (Chrome) or
-        <a href="https://addons.mozilla.org/en-US/firefox/addon/cookies-txt/" target="_blank" rel="noopener">cookies.txt</a> (Firefox),
-        export for youtube.com, paste below. Never stored on the server.
+        On desktop: install <a href="https://chromewebstore.google.com/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc" target="_blank" rel="noopener">Get cookies.txt</a> (Chrome) or
+        <a href="https://addons.mozilla.org/en-US/firefox/addon/cookies-txt/" target="_blank" rel="noopener">cookies.txt</a> (Firefox) and export for youtube.com.
+        On phone: export on desktop, transfer the file, then tap "upload file" below. Never stored on the server.
       </p>
-      <textarea id="cookies" placeholder="# Netscape HTTP Cookie File&#10;.youtube.com	TRUE	/	FALSE	..."></textarea>
+      <div class="cookie-row">
+        <textarea id="cookies" placeholder="# Netscape HTTP Cookie File&#10;.youtube.com	TRUE	/	FALSE	..."></textarea>
+        <label class="upload-btn" for="cookie-file">upload<br>file</label>
+        <input type="file" id="cookie-file" accept=".txt" style="display:none">
+      </div>
     </details>
 
     <hr>
@@ -427,7 +453,7 @@
 
     <footer>
       powered by yt-dlp &middot; no tracking &middot; no storage &middot; no ads<br>
-      reddit videos may be silent (dash streams require server-side merging) &middot; audio in m4a/webm
+      youtube may require cookies if blocked &middot; audio in m4a/webm
     </footer>
 
   </main>
@@ -513,9 +539,9 @@
           const msg = data.error;
           if (/sign in|bot|login|confirm/i.test(msg)) {
             if (cookies) {
-              status('err', 'youtube blocked this server\'s IP — even with cookies, Vercel\'s datacenter is banned. Use the desktop app for YouTube.');
+              status('err', 'youtube blocked this server\'s IP even with cookies — try the desktop app for reliable YouTube downloads');
             } else {
-              status('err', 'youtube blocked — expand "YouTube cookies" above and paste your cookies');
+              status('err', 'youtube blocked — expand "YouTube cookies" above, export cookies.txt from your browser and upload/paste it');
             }
           } else if (/unsupported url|no video/i.test(msg)) {
             status('err', 'unsupported link — check the url and try again');
@@ -555,6 +581,17 @@
 
     document.getElementById('url')
       .addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+
+    document.getElementById('cookie-file').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        document.getElementById('cookies').value = ev.target.result;
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    });
 
     buildQuality(VQ);
     updateThemeBtn();
