@@ -6,9 +6,10 @@ if ! python3 -m venv --help &>/dev/null || ! python3 -c "import tkinter" &>/dev/
   sudo apt-get install -y python3-venv python3-tk
 fi
 
-if [ ! -d ".venv" ]; then
+if [ ! -f ".venv/bin/pip" ]; then
   echo "Creating virtual environment..."
-  python3 -m venv .venv
+  rm -rf .venv
+  python3 -m venv .venv --copies
 fi
 
 source .venv/bin/activate
