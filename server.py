@@ -2,7 +2,7 @@
 import os
 import socket
 import sys
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import HTTPServer
 from urllib.parse import urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -12,13 +12,19 @@ from api.proxy import handler as Proxy
 INDEX = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'index.html')
 
 
-class Router(BaseHTTPRequestHandler):
+class Router(DL):
+    """Extends the download handler so self._handle, self._json etc. exist,
+    then routes proxy paths to Proxy methods and serves index.html at /."""
 
     def do_OPTIONS(self):
-        self._route('do_OPTIONS')
+        if urlparse(self.path).path.startswith('/api/proxy'):
+            Proxy.do_OPTIONS(self)
+        else:
+            DL.do_OPTIONS(self)
 
     def do_GET(self):
-        if urlparse(self.path).path in ('/', '/index.html'):
+        path = urlparse(self.path).path
+        if path in ('/', '/index.html'):
             with open(INDEX, 'rb') as f:
                 body = f.read()
             self.send_response(200)
@@ -26,35 +32,13 @@ class Router(BaseHTTPRequestHandler):
             self.send_header('Content-Length', str(len(body)))
             self.end_headers()
             self.wfile.write(body)
+        elif path.startswith('/api/proxy'):
+            Proxy.do_GET(self)
         else:
-            self._route('do_GET')
+            DL.do_GET(self)
 
     def do_POST(self):
-        self._route('do_POST')
-
-    def _route(self, method):
-        path = urlparse(self.path).path
-        try:
-            if path.startswith('/api/download'):
-                getattr(DL, method)(self)
-            elif path.startswith('/api/proxy'):
-                getattr(Proxy, method)(self)
-            else:
-                self.send_response(404)
-                self.end_headers()
-        except Exception:
-            import traceback, json
-            traceback.print_exc()
-            try:
-                body = json.dumps({'error': traceback.format_exc()}).encode()
-                self.send_response(500)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Content-Length', str(len(body)))
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                self.wfile.write(body)
-            except Exception:
-                pass
+        DL.do_POST(self)
 
     def log_message(self, fmt, *args):
         print(f'  {self.address_string()} {fmt % args}')
