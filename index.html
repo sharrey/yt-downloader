@@ -422,11 +422,11 @@
     </div>
 
     <details class="cookies">
-      <summary>YouTube cookies <span style="font-weight:400;letter-spacing:0;text-transform:none;font-style:italic">&nbsp;— if blocked</span></summary>
+      <summary>Cookies <span style="font-weight:400;letter-spacing:0;text-transform:none;font-style:italic">&nbsp;— YouTube / Reddit / any site if blocked</span></summary>
       <p class="cookies-help">
         On desktop: install <a href="https://chromewebstore.google.com/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc" target="_blank" rel="noopener">Get cookies.txt</a> (Chrome) or
-        <a href="https://addons.mozilla.org/en-US/firefox/addon/cookies-txt/" target="_blank" rel="noopener">cookies.txt</a> (Firefox) and export for youtube.com.
-        On phone: export on desktop, transfer the file, then tap "upload file" below. Never stored on the server.
+        <a href="https://addons.mozilla.org/en-US/firefox/addon/cookies-txt/" target="_blank" rel="noopener">cookies.txt</a> (Firefox), then export for the site you're downloading from (e.g. youtube.com or reddit.com).
+        On phone: export on desktop, transfer the file, tap "upload file" below. Never stored on the server.
       </p>
       <div class="cookie-row">
         <textarea id="cookies" placeholder="# Netscape HTTP Cookie File&#10;.youtube.com	TRUE	/	FALSE	..."></textarea>
@@ -546,7 +546,7 @@
           } else if (/unsupported url|no video/i.test(msg)) {
             status('err', 'unsupported link — check the url and try again');
           } else {
-            status('err', 'error — ' + msg.slice(0, 90));
+            status('err', 'error — ' + msg.slice(0, 300));
           }
           return;
         }
