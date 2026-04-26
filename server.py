@@ -75,13 +75,9 @@ class Router(DL):
             if fmt == 'mp3':
                 fmt_str = 'bestaudio/best'
             elif quality == 'best':
-                fmt_str = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best'
+                fmt_str = 'bestvideo+bestaudio/best'
             else:
-                fmt_str = (
-                    f'bestvideo[height<={quality}][ext=mp4]+bestaudio[ext=m4a]'
-                    f'/bestvideo[height<={quality}]+bestaudio'
-                    f'/best[height<={quality}]/best'
-                )
+                fmt_str = f'bestvideo[height<={quality}]+bestaudio/best[height<={quality}]/best'
 
             ydl_opts = {
                 'format':               fmt_str,

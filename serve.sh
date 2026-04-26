@@ -13,7 +13,7 @@ if [ ! -f ".venv/bin/pip" ]; then
 fi
 
 source .venv/bin/activate
-.venv/bin/pip install yt-dlp -q
+.venv/bin/pip install -U yt-dlp -q
 
 if [ "$1" = "tunnel" ]; then
   .venv/bin/python3 server.py &
